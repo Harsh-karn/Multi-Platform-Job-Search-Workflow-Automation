@@ -1,25 +1,19 @@
 from celery import Celery
 import asyncio
 from app.models import ResumeProfile
-from app.scrapers.jobicy_scraper import search_jobicy
-from app.scrapers.adzuna_scraper import search_adzuna
+from app.scrapers.rss_scraper import search_rss
+from app.scrapers.linkedin_scraper import search_linkedin
 from app.scrapers.google_jobs_scraper import search_google_jobs
 from app.scrapers.naukri_scraper import search_naukri
 from app.services.aggregator import aggregate
 from app.services.ranker import rank_jobs
 
-# Configure Celery
-# Use Redis as broker and backend
-# Ensure Redis is running locally on default port 6379
 celery_app = Celery(
     "job_search_tasks",
     broker="redis://localhost:6379/0",
     backend="redis://localhost:6379/0"
 )
 
-# In-memory store for demo purposes. 
-# In a real app, you'd store this in Redis or a DB because celery workers are separate processes.
-# For simplicity, we will just return the result to the backend.
 results_store = {}
 
 @celery_app.task(name="process_job_search")
@@ -38,9 +32,9 @@ async def _run_scrapers_async(session_id: str, profile_dict: dict):
         profile = ResumeProfile(**profile_dict)
         
         # Fan out to all scrapers concurrently
-        jobicy_jobs, adzuna_jobs, google_jobs, naukri_jobs = await asyncio.gather(
-            search_jobicy(profile_dict),
-            search_adzuna(profile_dict),
+        rss_jobs, linkedin_jobs, google_jobs, naukri_jobs = await asyncio.gather(
+            search_rss(profile_dict),
+            search_linkedin(profile_dict),
             search_google_jobs(profile_dict),
             search_naukri(profile_dict),
             return_exceptions=True   # don't fail if one scraper errors
@@ -48,7 +42,7 @@ async def _run_scrapers_async(session_id: str, profile_dict: dict):
         
         # Filter out exceptions from results
         all_lists = []
-        for jobs in [jobicy_jobs, adzuna_jobs, google_jobs, naukri_jobs]:
+        for jobs in [rss_jobs, linkedin_jobs, google_jobs, naukri_jobs]:
             if isinstance(jobs, list):
                 all_lists.append(jobs)
             else:

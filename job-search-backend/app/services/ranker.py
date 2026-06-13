@@ -1,12 +1,12 @@
 import json
-from google import genai
+import httpx
 from app.models import JobListing, ResumeProfile
 
 def rank_jobs(jobs: list[JobListing], profile: ResumeProfile) -> list[JobListing]:
     if not jobs:
         return []
         
-    client = genai.Client()
+    url = "http://localhost:11434/api/generate"
     
     # Batch score in groups of 10 to save API calls and context length issues
     batches = [jobs[i:i+10] for i in range(0, len(jobs), 10)]
@@ -31,13 +31,19 @@ Jobs to score:
 Return ONLY a valid JSON array of numbers representing scores in order: [85, 42, 71]
 No markdown formatting, no text, no explanation. Just the JSON array.
 """
+        payload = {
+            "model": "llama3",
+            "prompt": prompt,
+            "stream": False,
+            "format": "json"
+        }
+        
         try:
-            response = client.models.generate_content(
-                model='gemini-2.5-pro',
-                contents=prompt,
-            )
+            response = httpx.post(url, json=payload, timeout=120.0)
+            response.raise_for_status()
+            result = response.json()
+            response_text = result.get("response", "[]")
             
-            response_text = response.text
             # Cleanup markdown
             if response_text.startswith("```json"):
                 response_text = response_text.strip()[7:-3]
