@@ -4,14 +4,14 @@ This project is an AI-powered, full-stack workflow automation system designed to
 
 ## Features
 
-- **Resume Parsing**: Uses local Llama 3 (via Ollama) to extract structured candidate data from uploaded resumes.
+- **Resume Parsing**: Uses local Llama 3.2 (1B) (via Ollama) to extract structured candidate data from uploaded resumes.
 - **Multi-Platform Aggregation**: Searches for jobs entirely through scraping and public feeds without any API keys:
   - **Google Jobs** (Direct structured data extraction)
   - **Naukri** (Headless browser scraping via Playwright)
   - **LinkedIn** (Headless browser scraping via Playwright)
   - **Himalayas/RSS** (Public JSON feed for remote jobs)
 - **Asynchronous Processing**: Utilizes Celery and Redis to handle concurrent scraping without blocking the backend API.
-- **AI Ranking**: Local Llama 3 evaluates each job description against the candidate's profile to generate a match score (0-100%).
+- **AI Ranking**: Local Llama 3.2 (1B) evaluates each job description against the candidate's profile to generate a match score (0-100%).
 - **Modern UI**: A responsive, dark-themed Next.js frontend built with Tailwind CSS and Lucide icons.
 
 ## Tech Stack
@@ -20,7 +20,7 @@ This project is an AI-powered, full-stack workflow automation system designed to
 |---|---|
 | **Frontend** | Next.js (App Router), React, Tailwind CSS |
 | **Backend API** | FastAPI (Python) |
-| **AI / LLM** | Ollama (Local Llama 3 model) |
+| **AI / LLM** | Ollama (Local Llama 3.2 1B model) |
 | **Task Queue** | Celery |
 | **Broker / Cache** | Redis |
 | **Scraping** | Playwright, BeautifulSoup4, HTTPX |
@@ -30,7 +30,7 @@ This project is an AI-powered, full-stack workflow automation system designed to
 - **Python 3.10+**
 - **Node.js 18+**
 - **Redis Server** (Running locally on default port `6379`)
-- **Ollama** (Running locally with the `llama3` model downloaded via `ollama run llama3`)
+- **Ollama** (Running locally with the model downloaded via `ollama run llama3.2:1b`)
 
 ## Installation & Setup
 
