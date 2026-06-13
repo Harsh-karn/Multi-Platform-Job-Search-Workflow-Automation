@@ -1,119 +1,129 @@
-# Multi-Platform Job Search Workflow Automation
+<div align="center">
+  
+# 🚀 Multi-Platform Job Search Workflow Automation
+  
+**An AI-powered, 100% local, and free job search automation tool.** <br>
+Upload your resume, and let local AI and headless scrapers find and rank the best jobs for you across the web.
 
-This project is an AI-powered, full-stack workflow automation system designed to streamline the job search process. It accepts a candidate's resume, uses Gemini AI to extract key profile information (skills, roles, experience), and then asynchronously scrapes and aggregates job listings from multiple platforms. Finally, the AI ranks the matched jobs based on how well they fit the candidate's profile.
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local_AI-white?style=for-the-badge&logo=ollama&logoColor=black)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 
-## Features
+</div>
 
-- **Resume Parsing**: Uses local Llama 3.2 (1B) (via Ollama) to extract structured candidate data from uploaded resumes.
-- **Multi-Platform Aggregation**: Searches for jobs entirely through scraping and public feeds without any API keys:
-  - **Google Jobs** (Direct structured data extraction)
-  - **Naukri** (Headless browser scraping via Playwright)
-  - **LinkedIn** (Headless browser scraping via Playwright)
-  - **Himalayas/RSS** (Public JSON feed for remote jobs)
-- **Asynchronous Processing**: Utilizes Celery and Redis to handle concurrent scraping without blocking the backend API.
-- **AI Ranking**: Local Llama 3.2 (1B) evaluates each job description against the candidate's profile to generate a match score (0-100%).
-- **Modern UI**: A responsive, dark-themed Next.js frontend built with Tailwind CSS and Lucide icons.
+---
 
-## Tech Stack
+## ✨ Features
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | Next.js (App Router), React, Tailwind CSS |
-| **Backend API** | FastAPI (Python) |
-| **AI / LLM** | Ollama (Local Llama 3.2 1B model) |
-| **Task Queue** | Celery |
-| **Broker / Cache** | Redis |
-| **Scraping** | Playwright, BeautifulSoup4, HTTPX |
+- 🧠 **100% Local AI Parsing**: Uses **Llama 3.2 (1B)** via Ollama running directly on your machine to extract skills, roles, and experience from your resume. No data leaves your computer.
+- 🕷️ **Headless Web Scraping**: Bypasses the need for expensive API keys by scraping directly:
+  - **LinkedIn** (via Playwright headless browser)
+  - **Naukri** (via Playwright headless browser)
+  - **Google Jobs** (Direct JSON-LD structured data extraction)
+  - **Himalayas / Remote** (Public JSON RSS feeds)
+- ⚡ **Asynchronous Architecture**: Built-in FastAPI background tasks run web scrapers concurrently without blocking the UI.
+- 📊 **Intelligent Ranking**: The local Llama 3.2 model evaluates each scraped job description against your exact resume profile, generating a **0-100% Match Score**.
+- 🎨 **Aesthetic UI**: A sleek, dark-themed, glassmorphic Next.js frontend built with Tailwind CSS and Lucide Icons.
 
-## Prerequisites
+---
 
-- **Python 3.10+**
-- **Node.js 18+**
-- **Redis Server** (Running locally on default port `6379`)
-- **Ollama** (Running locally with the model downloaded via `ollama run llama3.2:1b`)
+## 🔄 How It Works (System Workflow)
 
-## Installation & Setup
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Harsh-karn/Multi-Platform-Job-Search-Workflow-Automation.git
-cd Multi-Platform-Job-Search-Workflow-Automation
+```mermaid
+graph TD
+    A[User Uploads Resume] -->|PDF/DOCX/TXT| B(Next.js Frontend)
+    B -->|POST /search| C(FastAPI Backend)
+    C -->|Extract Profile| D{Local Ollama <br> Llama 3.2}
+    D -->|JSON Profile| E[FastAPI Background Task]
+    
+    E -->|Async Fan-out| F1(LinkedIn Scraper <br> Playwright)
+    E -->|Async Fan-out| F2(Naukri Scraper <br> Playwright)
+    E -->|Async Fan-out| F3(Google Jobs <br> HTTPX)
+    E -->|Async Fan-out| F4(Himalayas <br> Public JSON)
+    
+    F1 & F2 & F3 & F4 --> G[Job Aggregation & Deduplication]
+    G -->|Job Descriptions| H{Local Ollama <br> Match Scoring}
+    H -->|Ranked Jobs| I[(In-Memory Store)]
+    
+    B -.->|Polling GET /results| I
+    I -.->|Render Job Cards| B
 ```
 
-### 2. Backend Setup
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend** | Next.js (App Router), Tailwind CSS | Responsive UI and file uploading |
+| **Backend** | FastAPI (Python), Uvicorn | High-performance async API |
+| **Local AI** | Ollama, Llama 3.2 (1B) | Privacy-first Resume Parsing & Ranking |
+| **Scraping** | Playwright, BeautifulSoup4, HTTPX | Browser automation and HTTP requests |
+
+---
+
+## 🚀 Getting Started
+
+This project relies on **zero external API keys** and **no external databases** (Celery/Redis have been removed for simplicity). 
+
+### 1. Prerequisites
+- **Python 3.10+**
+- **Node.js 18+**
+- **Ollama**: Download from [ollama.com](https://ollama.com/)
+
+### 2. Set up Local AI (Ollama)
+Before running the backend, you must download the Llama 3.2 (1B) model. Open your terminal and run:
+```bash
+ollama run llama3.2:1b
+```
+*Keep this terminal open, or ensure Ollama is running in your system tray.*
+
+### 3. Backend Setup
+Open a new terminal window:
 ```bash
 cd job-search-backend
 
-# Create and activate a virtual environment
+# Create and activate virtual environment
 python -m venv venv
-# On Windows
+# Windows:
 .\venv\Scripts\activate
-# On Mac/Linux
+# Mac/Linux:
 source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
-# Alternatively, if requirements.txt is missing:
-# pip install fastapi uvicorn celery redis httpx playwright beautifulsoup4 python-multipart pydantic
+pip install fastapi uvicorn httpx playwright beautifulsoup4 python-multipart pydantic
 
-# Install Playwright browsers (required for Naukri & LinkedIn scrapers)
+# Install headless browsers for Playwright
 playwright install chromium
-```
 
-### 3. Frontend Setup
-```bash
-cd ../frontend
-
-# Install dependencies
-npm install
-# or
-yarn install
-```
-
-## Running the Application Locally
-
-You will need three separate terminal windows running concurrently.
-
-**Terminal 1: Redis Server**
-Make sure your Redis server is running. If installed locally on Windows via WSL or Docker:
-```bash
-redis-server
-```
-
-**Terminal 2: FastAPI Backend**
-```bash
-cd job-search-backend
-.\venv\Scripts\activate
-
-# Start the server
+# Start the FastAPI server
 uvicorn app.main:app --reload
 ```
-*API will run at http://localhost:8000*
+*The API will run on http://localhost:8000*
 
-**Terminal 3: Celery Worker**
-```bash
-cd job-search-backend
-.\venv\Scripts\activate
-
-# Start Celery worker (Windows usually requires --pool=solo)
-celery -A app.tasks.celery_app worker --loglevel=info --pool=solo
-```
-
-**Terminal 4: Next.js Frontend**
+### 4. Frontend Setup
+Open a third terminal window:
 ```bash
 cd frontend
 
-# Start the development server
+# Install Node dependencies
+npm install
+
+# Start the Next.js development server
 npm run dev
 ```
-*Frontend will run at http://localhost:3000*
+*The UI will run on http://localhost:3000*
 
-## How it Works
-1. Navigate to the frontend (http://localhost:3000).
-2. Upload a `.txt`, `.pdf`, or `.docx` resume file.
-3. The frontend sends the file to the FastAPI `/search` endpoint.
-4. FastAPI sends the text to your local Ollama instance to extract profile details, creates a background Celery task, and returns a `task_id`.
-5. The frontend polls the `/results/{task_id}` endpoint every 3 seconds.
-6. Meanwhile, the Celery worker concurrently spins up Playwright to scrape Naukri and LinkedIn, fetches Google Jobs data, and pulls the Himalayas RSS feed.
-7. Jobs are deduplicated, passed to Ollama for match scoring, and saved in Celery's Redis result backend.
-8. The frontend receives the `done` status and renders the job cards sorted by the highest match score.
+---
+
+## 💡 Usage
+
+1. Open your browser to `http://localhost:3000`.
+2. Drag and drop your `.txt`, `.pdf`, or `.docx` resume into the upload zone.
+3. Click **Find Matches**.
+4. The system will silently orchestrate headless browsers in the background, ping public feeds, and use your local GPU/CPU to score the jobs.
+5. Review your personalized, ranked job feed and click the arrow to apply directly on the source website!
+
+---
+*Disclaimer: Web scraping is subject to the Terms of Service of the respective platforms. This tool is intended for personal, educational use.*
