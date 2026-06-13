@@ -1,0 +1,17 @@
+# Python / Backend
+job-search-backend/venv/
+job-search-backend/__pycache__/
+*.pyc
+.env
+
+# Node / Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+.npm
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db
